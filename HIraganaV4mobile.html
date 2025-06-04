@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz de Hiragana</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: url('fondo.jpg') no-repeat center center fixed;
+      background-size: cover;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      color: #333;
+    }
+
+    h1 {
+      margin: 1rem 0 0.5rem;
+      background: rgba(255, 255, 255, 0.85);
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      font-size: 1.8rem;
+      text-align: center;
+    }
+
+    #streak {
+      background: rgba(255, 255, 255, 0.85);
+      padding: 0.4rem 1rem;
+      border-radius: 8px;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+
+    #svg-container {
+      width: 80vw;
+      max-width: 320px;
+      height: 80vw;
+      max-height: 320px;
+      border: 3px solid #ccc;
+      background: white;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #svg-container img {
+      width: 90%;
+      height: auto;
+    }
+
+    .options {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0 1rem;
+      margin-bottom: 1rem;
+    }
+
+    button {
+      padding: 0.8rem 1.2rem;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 8px;
+      background-color: #3498db;
+      color: white;
+      cursor: pointer;
+      flex: 1 0 40%;
+      max-width: 45%;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
+    #message {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      background: rgba(255, 255, 255, 0.85);
+      padding: 0.6rem 1.2rem;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    @media (min-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+      button {
+        font-size: 1.2rem;
+        max-width: 180px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>¿Qué letra es esta?</h1>
+  <div id="streak">Racha: 0</div>
+  <div id="svg-container"></div>
+  <div class="options" id="options"></div>
+  <div id="message"></div>
+
+  <audio id="correct-sound" src="correcto.mp3" preload="auto"></audio>
+  <audio id="incorrect-sound" src="incorrecto.mp3" preload="auto"></audio>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <script>
+    const hiraganaMap = {
+      "あ": "a", "い": "i", "う": "u", "え": "e", "お": "o",
+      "か": "ka", "き": "ki", "く": "ku", "け": "ke", "こ": "ko",
+      "さ": "sa", "し": "shi", "す": "su", "せ": "se", "そ": "so",
+      "た": "ta", "ち": "chi", "つ": "tsu", "て": "te", "と": "to",
+      "な": "na", "に": "ni", "ぬ": "nu", "ね": "ne", "の": "no",
+      "は": "ha", "ひ": "hi", "ふ": "fu", "へ": "he", "ほ": "ho",
+      "ま": "ma", "み": "mi", "む": "mu", "め": "me", "も": "mo",
+      "や": "ya", "ゆ": "yu", "よ": "yo",
+      "ら": "ra", "り": "ri", "る": "ru", "れ": "re", "ろ": "ro",
+      "わ": "wa", "を": "wo", "ん": "n"
+    };
+
+    const hiraganaList = Object.keys(hiraganaMap);
+
+    let currentChar = "";
+    let streak = 0;
+
+    const correctSound = document.getElementById("correct-sound");
+    const incorrectSound = document.getElementById("incorrect-sound");
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function pickNewChar() {
+      const correctChar = hiraganaList[Math.floor(Math.random() * hiraganaList.length)];
+      currentChar = correctChar;
+
+      const correctRomaji = hiraganaMap[correctChar];
+      const otherRomaji = shuffle(Object.values(hiraganaMap).filter(r => r !== correctRomaji)).slice(0, 3);
+      const options = shuffle([correctRomaji, ...otherRomaji]);
+
+      document.getElementById("svg-container").innerHTML =
+        `<img src="hiragana_svgs/${correctChar}.svg" alt="${correctRomaji}">`;
+
+      const optionsDiv = document.getElementById("options");
+      optionsDiv.innerHTML = "";
+      options.forEach(option => {
+        const btn = document.createElement("button");
+        btn.textContent = option;
+        btn.onclick = () => checkAnswer(option);
+        optionsDiv.appendChild(btn);
+      });
+
+      document.getElementById("message").textContent = "";
+    }
+
+    function lanzarConfeti() {
+      confetti({
+        particleCount: 200,
+        spread: 70,
+        origin: { y: 0.6 },
+      });
+    }
+
+    function checkAnswer(answer) {
+      const correct = hiraganaMap[currentChar];
+      const message = document.getElementById("message");
+      if (answer === correct) {
+        correctSound.play();
+        streak++;
+        message.textContent = "✅ ¡Correcto!";
+        message.style.color = "green";
+
+        if (streak === 20 || streak === 46) {
+          lanzarConfeti();
+        }
+
+      } else {
+        incorrectSound.play();
+        streak = 0;
+        message.textContent = `❌ Incorrecto. Era "${correct}".`;
+        message.style.color = "red";
+      }
+
+      document.getElementById("streak").textContent = `Racha: ${streak}`;
+      setTimeout(pickNewChar, 1500);
+    }
+
+    pickNewChar();
+  </script>
+</body>
+</html>
