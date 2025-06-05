@@ -1,9 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quiz de Hiragana</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quiz Kana</title>
+
+  <!-- Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
+    crossorigin="anonymous"></script>
+
   <style>
     body {
       font-family: "Segoe UI", sans-serif;
@@ -12,26 +17,44 @@
       margin: 0;
       padding: 0;
       display: flex;
-      flex-direction: column;
-      align-items: center;
       min-height: 100vh;
-      color: #333;
+    }
+
+    .sidebar-ad {
+      display: none;
+    }
+
+    .main-content {
+      flex: 1;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 400px;
+  margin: 0 auto;
     }
 
     h1 {
-      margin: 1rem 0 0.5rem;
-      background: rgba(255, 255, 255, 0.85);
-      padding: 0.5rem 1rem;
-      border-radius: 10px;
       font-size: 1.8rem;
-      text-align: center;
+      margin: 0.5rem 0;
+      background: rgba(255, 255, 255, 0.85);
+      padding: 0.4rem 1rem;
+      border-radius: 10px;
+    }
+
+    select {
+      font-size: 1rem;
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
     }
 
     #streak {
       background: rgba(255, 255, 255, 0.85);
       padding: 0.4rem 1rem;
       border-radius: 8px;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       margin-bottom: 1rem;
     }
 
@@ -88,10 +111,31 @@
       text-align: center;
     }
 
+    .mobile-ad {
+      display: block;
+      width: 100%;
+      margin-top: 1rem;
+    }
+
     @media (min-width: 768px) {
+      body {
+        flex-direction: row;
+      }
+      
+      .sidebar-ad {
+        display: block;
+        width: 60px;
+        margin: 1rem 0 1rem 1rem;
+      }
+
+      .mobile-ad {
+        display: none;
+      }
+
       h1 {
         font-size: 2rem;
       }
+
       button {
         font-size: 1.2rem;
         max-width: 180px;
@@ -99,104 +143,152 @@
     }
   </style>
 </head>
+
 <body>
+  <!-- Anuncio lateral (PC) -->
+  <div class="sidebar-ad">
+    <ins class="adsbygoogle"
+         style="display:block;width:160px;height:600px"
+         data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+         data-ad-slot="YYYYYYYYYY"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
 
-  <h1>¿Qué letra es esta?</h1>
-  <div id="streak">Racha: 0</div>
-  <div id="svg-container"></div>
-  <div class="options" id="options"></div>
-  <div id="message"></div>
+  <!-- Contenido principal -->
+  <div class="main-content">
+    <h1>¿Qué letra es esta?</h1>
+    <select id="kana-type">
+      <option value="hiragana">Hiragana</option>
+      <option value="katakana">Katakana</option>
+    </select>
 
-  <audio id="correct-sound" src="correcto.mp3" preload="auto"></audio>
-  <audio id="incorrect-sound" src="incorrecto.mp3" preload="auto"></audio>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <div id="streak">Racha: 0</div>
+    <div id="svg-container"></div>
+    <div class="options" id="options"></div>
 
-  <script>
-    const hiraganaMap = {
-      "あ": "a", "い": "i", "う": "u", "え": "e", "お": "o",
-      "か": "ka", "き": "ki", "く": "ku", "け": "ke", "こ": "ko",
-      "さ": "sa", "し": "shi", "す": "su", "せ": "se", "そ": "so",
-      "た": "ta", "ち": "chi", "つ": "tsu", "て": "te", "と": "to",
-      "な": "na", "に": "ni", "ぬ": "nu", "ね": "ne", "の": "no",
-      "は": "ha", "ひ": "hi", "ふ": "fu", "へ": "he", "ほ": "ho",
-      "ま": "ma", "み": "mi", "む": "mu", "め": "me", "も": "mo",
-      "や": "ya", "ゆ": "yu", "よ": "yo",
-      "ら": "ra", "り": "ri", "る": "ru", "れ": "re", "ろ": "ro",
-      "わ": "wa", "を": "wo", "ん": "n"
-    };
+    <!-- Anuncio móvil (debajo de los botones) -->
+    <div class="mobile-ad">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+           data-ad-slot="ZZZZZZZZZZ"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
 
-    const hiraganaList = Object.keys(hiraganaMap);
+    <div id="message"></div>
 
-    let currentChar = "";
-    let streak = 0;
+    <audio id="correct-sound" src="correcto.mp3" preload="auto"></audio>
+    <audio id="incorrect-sound" src="incorrecto.mp3" preload="auto"></audio>
 
-    const correctSound = document.getElementById("correct-sound");
-    const incorrectSound = document.getElementById("incorrect-sound");
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>
+      const kanaMap = {
+        hiragana: [
+          "a", "i", "u", "e", "o",
+          "ka", "ki", "ku", "ke", "ko",
+          "sa", "shi", "su", "se", "so",
+          "ta", "chi", "tsu", "te", "to",
+          "na", "ni", "nu", "ne", "no",
+          "ha", "hi", "fu", "he", "ho",
+          "ma", "mi", "mu", "me", "mo",
+          "ya", "yu", "yo",
+          "ra", "ri", "ru", "re", "ro",
+          "wa", "wo", "n"
+        ],
+        katakana: [
+          "a", "i", "u", "e", "o",
+          "ka", "ki", "ku", "ke", "ko",
+          "sa", "shi", "su", "se", "so",
+          "ta", "chi", "tsu", "te", "to",
+          "na", "ni", "nu", "ne", "no",
+          "ha", "hi", "fu", "he", "ho",
+          "ma", "mi", "mu", "me", "mo",
+          "ya", "yu", "yo",
+          "ra", "ri", "ru", "re", "ro",
+          "wa", "wo", "n"
+        ]
+      };
 
-    function shuffle(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
-      return array;
-    }
+      let currentKana = "";
+      let kanaType = "hiragana";
+      let streak = 0;
 
-    function pickNewChar() {
-      const correctChar = hiraganaList[Math.floor(Math.random() * hiraganaList.length)];
-      currentChar = correctChar;
-
-      const correctRomaji = hiraganaMap[correctChar];
-      const otherRomaji = shuffle(Object.values(hiraganaMap).filter(r => r !== correctRomaji)).slice(0, 3);
-      const options = shuffle([correctRomaji, ...otherRomaji]);
-
-      document.getElementById("svg-container").innerHTML =
-        `<img src="hiragana_svgs/${correctChar}.svg" alt="${correctRomaji}">`;
-
-      const optionsDiv = document.getElementById("options");
-      optionsDiv.innerHTML = "";
-      options.forEach(option => {
-        const btn = document.createElement("button");
-        btn.textContent = option;
-        btn.onclick = () => checkAnswer(option);
-        optionsDiv.appendChild(btn);
-      });
-
-      document.getElementById("message").textContent = "";
-    }
-
-    function lanzarConfeti() {
-      confetti({
-        particleCount: 200,
-        spread: 70,
-        origin: { y: 0.6 },
-      });
-    }
-
-    function checkAnswer(answer) {
-      const correct = hiraganaMap[currentChar];
+      const svgContainer = document.getElementById("svg-container");
+      const optionsContainer = document.getElementById("options");
       const message = document.getElementById("message");
-      if (answer === correct) {
-        correctSound.play();
-        streak++;
-        message.textContent = "✅ ¡Correcto!";
-        message.style.color = "green";
+      const streakDisplay = document.getElementById("streak");
+      const correctSound = document.getElementById("correct-sound");
+      const incorrectSound = document.getElementById("incorrect-sound");
 
-        if (streak === 20 || streak === 46) {
-          lanzarConfeti();
+      function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+      }
+
+      function loadNewKana() {
+        const kanaList = kanaMap[kanaType];
+        currentKana = kanaList[Math.floor(Math.random() * kanaList.length)];
+
+        const img = document.createElement("img");
+        img.src = `${kanaType}_svgs/${currentKana}.svg`;
+        img.alt = currentKana;
+        img.onerror = () => {
+          message.textContent = "Error al cargar el archivo SVG.";
+        };
+
+        svgContainer.innerHTML = "";
+        svgContainer.appendChild(img);
+
+        const options = [currentKana];
+        while (options.length < 4) {
+          const random = kanaList[Math.floor(Math.random() * kanaList.length)];
+          if (!options.includes(random)) {
+            options.push(random);
+          }
         }
 
-      } else {
-        incorrectSound.play();
-        streak = 0;
-        message.textContent = `❌ Incorrecto. Era "${correct}".`;
-        message.style.color = "red";
+        shuffle(options);
+        optionsContainer.innerHTML = "";
+        options.forEach(opt => {
+          const btn = document.createElement("button");
+          btn.textContent = opt;
+          btn.onclick = () => checkAnswer(opt);
+          optionsContainer.appendChild(btn);
+        });
+
+        message.textContent = "";
       }
 
-      document.getElementById("streak").textContent = `Racha: ${streak}`;
-      setTimeout(pickNewChar, 1500);
-    }
+      function checkAnswer(selected) {
+        if (selected === currentKana) {
+          correctSound.play();
+          message.textContent = "¡Correcto!";
+          streak++;
+          streakDisplay.textContent = `Racha: ${streak}`;
+          confetti();
+        } else {
+          incorrectSound.play();
+          message.textContent = `Incorrecto. Era "${currentKana}"`;
+          streak = 0;
+          streakDisplay.textContent = `Racha: 0`;
+        }
 
-    pickNewChar();
-  </script>
+        setTimeout(loadNewKana, 1000);
+      }
+
+      document.getElementById("kana-type").addEventListener("change", (e) => {
+        kanaType = e.target.value;
+        loadNewKana();
+      });
+
+      loadNewKana();
+    </script>
+  </div>
 </body>
 </html>
