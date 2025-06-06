@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inicio - Kana Quiz</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom right, #f8f9fa, #e0f7fa);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.5rem;
+      color: #333;
+    }
+
+    .card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      max-width: 500px;
+      width: 100%;
+      margin: 1rem auto;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .icon-selection {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .icon-selection img {
+      width: 64px;
+      height: 64px;
+      margin: 0.3rem;
+      cursor: pointer;
+      border: 3px solid transparent;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+
+    .icon-selection img:hover {
+      transform: scale(1.05);
+    }
+
+    .icon-selection img.selected {
+      border-color: #3498db;
+    }
+
+    input[type="text"] {
+      font-size: 1rem;
+      padding: 0.5rem;
+      width: 80%;
+      margin: 0.8rem auto;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      margin-top: 0.5rem;
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    button:hover {
+      background: #2980b9;
+    }
+
+    .stats {
+      font-size: 1.1rem;
+      margin: 1rem 0;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #eee;
+      color: #333;
+      border-radius: 8px;
+      padding: 0.4rem 0.8rem;
+      margin: 0.2rem;
+      font-size: 0.9rem;
+    }
+
+    .link {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.6rem 1.2rem;
+      background: #3498db;
+      color: white;
+      text-decoration: none;
+      border-radius: 10px;
+      transition: background 0.3s;
+    }
+
+    .link:hover {
+      background: #2980b9;
+    }
+
+    .achievement-unlocked {
+      animation: pop 0.8s ease-in-out;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.3); }
+      100% { transform: scale(1); }
+    }
+
+    /* --- Responsividad para móviles --- */
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .card {
+        padding: 1rem;
+      }
+
+      input[type="text"] {
+        width: 100%;
+      }
+
+      .icon-selection img {
+        width: 56px;
+        height: 56px;
+      }
+
+      .stats {
+        font-size: 1rem;
+      }
+
+      .link {
+        width: 100%;
+        padding: 0.8rem;
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Bienvenido, <span id="username-display"></span></h1>
+
+    <div>
+      <input type="text" id="username" placeholder="Tu nombre...">
+      <button onclick="saveProfile()">Guardar nombre</button>
+    </div>
+
+    <div class="icon-selection">
+      <img src="chibi-1.jpg" id="icon1" onclick="selectIcon('icon1')">
+      <img src="chibi-2.jpg" id="icon2" onclick="selectIcon('icon2')">
+      <img src="chibi-3.jpeg" id="icon3" onclick="selectIcon('icon3')">
+    </div>
+
+    <div class="stats">
+      <p>Racha actual: <span id="streak">0</span></p>
+      <p>Racha máxima: <span id="max-streak">0</span></p>
+      <p>Puntos: <span id="score">0</span></p>
+    </div>
+
+    <div>
+      <h3>Logros</h3>
+      <div id="badges">
+        <span id="badge-beginner" class="badge">Principiante ❌</span>
+        <span id="badge-advanced" class="badge">Avanzado ❌</span>
+        <span id="badge-master" class="badge">Master ❌</span>
+      </div>
+    </div>
+
+    <a href="quiz_kana.html" class="link">Ir al Quiz</a>
+  </div>
+
+  <script>
+    function loadProfile() {
+      const name = localStorage.getItem('username') || 'Estudiante';
+      const icon = localStorage.getItem('icon') || 'icon1';
+      const streak = parseInt(localStorage.getItem('streak') || '0');
+      const maxStreak = parseInt(localStorage.getItem('maxStreak') || '0');
+      const score = parseInt(localStorage.getItem('score') || '0');
+
+      document.getElementById('username-display').textContent = name;
+      document.getElementById('username').value = name;
+      document.getElementById('streak').textContent = streak;
+      document.getElementById('max-streak').textContent = Math.max(maxStreak, streak);
+      document.getElementById('score').textContent = score;
+
+      selectIcon(icon);
+
+      if (streak >= 20) unlock('badge-beginner');
+      if (streak >= 46) unlock('badge-advanced');
+      if (score >= 500) unlock('badge-master');
+    }
+
+    function saveProfile() {
+      const name = document.getElementById('username').value.trim();
+      if (name) {
+        localStorage.setItem('username', name);
+        document.getElementById('username-display').textContent = name;
+      }
+    }
+
+    function selectIcon(iconId) {
+      document.querySelectorAll('.icon-selection img').forEach(img => img.classList.remove('selected'));
+      const selected = document.getElementById(iconId);
+      selected.classList.add('selected');
+      localStorage.setItem('icon', iconId);
+    }
+
+    function unlock(id) {
+      const badge = document.getElementById(id);
+      badge.textContent = badge.textContent.replace('❌', '✔');
+      badge.classList.add('achievement-unlocked');
+    }
+
+    window.onload = loadProfile;
+  </script>
+
+<footer style="margin-top: auto; padding: 1rem; text-align: center; font-size: 0.9rem;">
+  <a href="privacidad.html" target="_blank" style="color: #666; text-decoration: underline;">
+    Política de privacidad
+  </a>
+</footer>
+
+
+</body>
+</html>
+
